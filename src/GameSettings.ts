@@ -1,7 +1,9 @@
 interface GameSettings {
-  players: Number;
-  boardWidth: Number;
-  boardHeight: Number;
-  initialViruses: Number;
-  previewPills: Number;
+  players: number;
+  boardWidth: number;
+  boardHeight: number;
+  initialViruses: number;
+  previewPills: number;
 }
+
+export default GameSettings;
