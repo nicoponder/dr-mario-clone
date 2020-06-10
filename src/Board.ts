@@ -15,6 +15,7 @@ class Board {
   previewPills: Pill[];
   currentPill: Pill;
   stopLoop: any;
+  gameOver: boolean;
 
   constructor(seed: Number, settings: GameSettings, index: Number) {
     this.score = 0;
@@ -63,9 +64,11 @@ class Board {
 
     this.draw();
 
+    if (!this.gameOver) {
     this.stopLoop = window.requestAnimationFrame(newNow =>
       this.tick(newNow, now, curLastGravityTick)
     );
+  }
   }
 
   nextPill() {
@@ -120,6 +123,7 @@ class Board {
 
   lose() {
     window.alert("lose!");
+    this.gameOver = true;
     window.cancelAnimationFrame(this.stopLoop);
   }
 
