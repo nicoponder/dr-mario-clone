@@ -31,7 +31,7 @@ class Piece implements IPiece {
     ctx.beginPath();
     ctx.arc(
       cellSize * this.x + r,
-      canvas.height - this.y * cellSize + r,
+      canvas.height - (this.y+1) * cellSize + r,
       r,
       0,
       2 * Math.PI
@@ -41,7 +41,7 @@ class Piece implements IPiece {
     if (this.direction === Direction.Left) {
       ctx.fillRect(
         this.x * cellSize + r,
-        canvas.height - this.y * cellSize,
+        canvas.height - (this.y+1) * cellSize,
         r,
         cellSize
       );
@@ -49,7 +49,7 @@ class Piece implements IPiece {
     if (this.direction === Direction.Right) {
       ctx.fillRect(
         this.x * cellSize,
-        canvas.height - this.y * cellSize,
+        canvas.height - (this.y+1) * cellSize,
         r,
         cellSize
       );

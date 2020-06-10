@@ -18,7 +18,7 @@ class Virus extends Piece {
     ctx.fillStyle = Color[this.color];
     ctx.fillRect(
       this.x * cellSize,
-      canvas.height - this.y * cellSize,
+      canvas.height - (this.y+1) * cellSize,
       cellSize - 1,
       cellSize - 1
     );
