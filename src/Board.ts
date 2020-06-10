@@ -1,3 +1,4 @@
+import {cloneDeep} from 'lodash';
 import seedrandom from "seedrandom";
 
 import GameSettings from "./GameSettings";
@@ -25,11 +26,7 @@ class Board {
     this.settings = settings;
     this.virusCount = this.settings.initialViruses;
     this.cells = this.newBoard();
-    this.currentPill = new Pill(
-      this.rng,
-      this.settings.boardWidth,
-      this.settings.boardHeight
-    );
+
     this.previewPills = [];
     for (let i = 0; i < this.settings.previewPills; i++) {
       this.previewPills[i] = new Pill(
@@ -56,19 +53,20 @@ class Board {
       return;
     }
 
+    this.draw();
+
     let curLastGravityTick = lastGravityTick;
     if (now - lastGravityTick > 1000) {
       this.gravityTick();
       curLastGravityTick = now;
     }
 
-    this.draw();
 
     if (!this.gameOver) {
-    this.stopLoop = window.requestAnimationFrame(newNow =>
-      this.tick(newNow, now, curLastGravityTick)
-    );
-  }
+      this.stopLoop = window.requestAnimationFrame(newNow =>
+        this.tick(newNow, now, curLastGravityTick)
+      );
+    }
   }
 
   nextPill() {
@@ -81,6 +79,7 @@ class Board {
       this.lose();
       return;
     }
+
     this.cells[left.y][left.x] = left;
     this.cells[right.y][right.x] = right;
   }
@@ -192,7 +191,7 @@ class Board {
         const cell = this.getCell(piece.x, lowestSame);
         if (cell) {
           cell.destroy();
-          this.cells[piece.x][lowestSame] = null;
+          this.cells[lowestSame][piece.x] = null;
         }
       }
     }
@@ -202,7 +201,7 @@ class Board {
         const cell = this.getCell(leftmostSame, rightmostSame);
         if (cell) {
           cell.destroy();
-          this.cells[piece.x][lowestSame] = null;
+          this.cells[piece.y][leftmostSame] = null;
         }
       }
     }
@@ -214,18 +213,28 @@ class Board {
 
   gravityTick() {
     const newCollisions: [number, number][] = [];
+    const newCells: Piece[][] = cloneDeep(this.cells);
 
+    let noUpdates = true;
     this.forEachCell((cell: Piece) => {
-      if (cell.fall(this.cells)) {
+      // early destructure because fall() involves changing y position, which
+      // would cause incorrect equality checks later
+      const {x,y} = cell;
+      if (cell.fall(this.cells, newCells)) {
         newCollisions.push([cell.x, cell.y]);
       }
+      if(!cell.equals(newCells[y][x])) {
+        noUpdates = false;
+      }
     });
+
+    this.cells = newCells;
 
     newCollisions.forEach(([x, y]) => {
       this.attemptClear(this.cells[y][x]!);
     });
 
-    if (newCollisions.length > 0) {
+    if (noUpdates) {
       this.nextPill();
     }
   }

@@ -58,25 +58,41 @@ class Piece implements IPiece {
 
   destroy() {}
 
-  fall(cells: (Piece | null)[][]) {
-    const hasCellBelow = Boolean(cells[this.y - 1][this.x]) || this.y - 1 === 0;
+  fall(cells: (Piece | null)[][], newCells: (Piece | null)[][]) {
+    const hasCellBelow = Boolean(cells[this.y - 1][this.x]) || this.y - 1 < 0;
+    const hasStuckSibling =
+      (this.direction === Direction.Left && Boolean(cells[this.y-1][this.x+1])) ||
+      (this.direction === Direction.Right && Boolean(cells[this.y-1][this.x-1]));
 
-    if (!this.isFalling && !hasCellBelow) {
-      this.isFalling = true;
-      cells[this.y - 1][this.x] = cells[this.y][this.x];
-      cells[this.y][this.x] = null;
-      this.y = this.y - 1;
-      return false;
-    }
-    if (this.isFalling && hasCellBelow) {
-      console.log(cells[this.y]);
+    // stop falling, report collision
+    if (this.isFalling && (hasStuckSibling || hasCellBelow)) {
       this.isFalling = false;
+      newCells[this.y][this.x] = cells[this.y][this.x];
       return true;
     }
+
+    // start/continue falling, report no new collisions
+    if (!this.isFalling && !hasCellBelow && !hasStuckSibling) {
+      this.isFalling = true;
+    }
     if (this.isFalling) {
-      cells[this.y - 1][this.x] = cells[this.y][this.x];
-      cells[this.y][this.x] = null;
+      newCells[this.y - 1][this.x] = cells[this.y][this.x];
+      newCells[this.y][this.x] = null;
       this.y = this.y - 1;
+    }
+    return false;
+  }
+
+  equals(piece: (Piece|null)) {
+    if (
+      piece &&
+      this.isFalling === piece.isFalling &&
+      this.direction === piece.direction &&
+      this.y === piece.y && 
+      this.x === piece.x &&
+      this.color === piece.color
+    ) {
+      return true;
     }
     return false;
   }
